@@ -15,7 +15,7 @@
 6. [Create a Producer for transactions topic](#step-6)
 7. [Perform complex joins using Flink to combine the records into one topic](#step-7)
 8. [Consume feature set topic and predict fraud transactions](#step-8)
-9. [Connect Flink with GoogleAI Model](#step-9)
+9. [Connect Flink with Bedrock Model](#step-9)
 10. [Flink Monitoring](#step-10)
 11. [Clean Up Resources](#step-11)
 12. [Confluent Resources and Further Testing](#step-12)
@@ -505,19 +505,19 @@ SELECT details FROM fraudulent_transactions
     <img src="images/fraud_transactions.png" width=75% height=75%>
 </div>
 
-## <a name="step-9"></a>Connect Flink with GoogleAI Model (LLM Inference)
+## <a name="step-9"></a>Connect Flink with Bedrock Model (LLM Inference)
 
-### 9.1 Prepare LLM Access (Google AI)
+### 9.1 Prepare LLM Access (Bedrock Model)
 You have two options:
 
 - **Option A (Lab sample):**
   - **API Key:** **`ask to your instructors`**
-  - **Gemini Endpoint:** `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
+  - **Bedrock Endpoint:** `https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1:0/invoke`
 
 - **Option B (Use your own):**
-  1. Go to https://aistudio.google.com → **Get API Key** → create or copy your key.
-  2. Note the **API Endpoint** (the URL before `?key=GEMINI_API_KEY`), e.g.  
-     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
+  1. Go to AWS IAM → **Get API Key and Secret** → create or copy your key.
+  2. Note the **API Endpoint** e.g.  
+     `https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1:0/invoke`
 
 > **Security Tip:** Treat API keys as secrets. Prefer environment variables or secret managers in real projects.
 
@@ -536,7 +536,7 @@ You have two options:
         <img src="images/ai-ui-3.png" width=75% height=75%>
     </div>
     
-3. Define your connection by set the ai endpoint and the key
+3. Define your connection by set the ai endpoint, key and secret 
    <div align="center" padding=25px>
         <img src="images/ai-ui-4.png" width=75% height=75%>
     </div>
