@@ -550,18 +550,22 @@ You have two options:
 Create a model with inputs/outputs and a system prompt describing the decision logic.
 
 ```sql
-CREATE MODEL NotificationEngine
-INPUT (
-  `details` VARCHAR(2147483647)
-)
-OUTPUT (
-  `judgement` VARCHAR(2147483647)
-)
-WITH (
-  'googleai.connection' = 'googleai-connection',
-  'provider' = 'googleai',
-  'task' = 'text_generation'
-);
+SELECT f.`credit_card_number`, f.customer_email, notif
+FROM fraudulent_transactions f,
+LATERAL TABLE(ML_PREDICT('fraud_notification', CONCAT(
+  'You will analyze the input and check the suspicious transactions.\n\n',
+      'Instructions:\n',
+      '- Give the best reasoning based on your input and analysis',
+      'Input Data:\n',
+  'Credit card number: ', CAST(f.credit_card_number AS STRING), '\n',
+  'Customer email: ', f.customer_email, '\n',
+  'Total amount: ', CAST(f.total_amount AS STRING), '\n',
+  'Transaction count: ', CAST(f.transaction_count AS STRING), '\n',
+  'Average spending amount: ', CAST(f.average_spending_amount AS STRING), '\n',
+      'Expected Output – Notification message',
+      'Notification: \n\n<Body of Notification message>'
+)));
+
 
 ```
 
