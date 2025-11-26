@@ -9,7 +9,7 @@
 ## **Agenda**
 1. [Log into Confluent Cloud](#step-1)
 2. [Create an Environment and Cluster](#step-2)
-3. [Create an API Key] (#step-3)
+3. [Create an API Key](#step-3)
 4. [Create Topics and walk through Confluent Cloud Dashboard](#step-4)
 5. [Create Datagen Connectors for Customers and Credit Cards](#step-5)
 6. [Configure the clients](#step-6)
