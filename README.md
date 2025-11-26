@@ -142,157 +142,73 @@ An environment contains clusters and its deployed components such as Apache Flin
 
 ***
 
-## <a name="step-4"></a>Create Datagen Connectors for Customers and Credit Cards
-The next step is to produce sample data using the Datagen Source connector. You will create two Datagen Source connectors. One connector will send sample customer data to **customers** topic, the other connector will send sample credit card data to **credit_cards** topic.
+## <a name="step-4"></a>Create CDC Connectors for Customers and Credit Cards
+1. Let's create CDC PostgreSQL Source Connector on Confluent Cloud, go back to the Cluster page Overview and click **Connectors** on the left tab
 
-1. First, you will create the connector that will send data to **customers**. From the Confluent Cloud UI, click on the **Connectors** tab on the navigation menu. Click on the **Datagen Source** icon.
+2. Search and Click **Postgres CDC Source V2 (Debezium) connector**
 
-<div align="center" padding=25px>
-    <img src="images/connectors.png" width=75% height=75%>
-</div>
+3. Fill up the config by using the value on this table and click launch
+<div align="center">
 
-2. Click **Additional Configuration** button.
-<div align="center" padding=25px>
-    <img src="images/connectors-1.png" width=75% height=75%>
-</div>
-
-3. Choose **customers** topic.
-<div align="center" padding=25px>
-    <img src="images/connectors-2.png" width=75% height=75%>
-</div>
-
-4. Click **Generate API Key and Download** and give any description. The API key would be downloaded and would be available in the downloads folder in the system
-<div align="center" padding=25px>
-    <img src="images/connectors-3.png" width=75% height=75%>
-</div>
-
-5. Choose **JSON_SR** for select output record value format.
-<div align="center" padding=25px>
-    <img src="images/connectors-4.png" width=75% height=75%>
-</div>
-
-6. Click on **Provide Your Own Schema** and paste the following contents
-```
-{
-  "type": "record",
-  "name": "CustomerRecord",
-  "namespace": "workshop_5",
-  "fields": [
-    {
-      "name": "customer_id",
-      "type": {
-        "type": "int",
-        "arg.properties": {
-          "iteration": {
-            "start": 100
-          }
-        }
-      }
-    },
-    {
-      "name": "customer_email",
-      "type": {
-        "type": "string",
-        "arg.properties": {
-          "options": [
-            "alex.jose@gmail.com",
-            "james.joe@gmail.com",
-            "john.doe@gmail.com",
-            "lisa.kudrow@gmail.com",
-            "jeniffer.aniston@gmail.com",
-            "ross.geller@gmail.com",
-            "joey.tribbiani@gmail.com",
-            "courtney.cox@gmail.com"
-          ]
-        }
-      }
-    },
-    {
-      "name": "average_spending_amount",
-      "type": {
-        "type": "int",
-        "arg.properties": {
-          "range": {
-            "min": 1000,
-            "max": 1500
-          }
-        }
-      }
-    }
-  ]
-}
-```
-7. Click on **Continue**, Sizing should be good, click on **Continue** again. You can name the connector anything or leave it as default and click on **Continue**.
-<div align="center" padding=25px>
-    <img src="images/connectors-5.png" width=75% height=75%>
-</div>
-
-
-8. After few seconds Connector would be provisioned and running. Check for messages in the **customers** topic by navigating to the topics section.
-9. Repeat the same steps to create a connector for **credit_cards** topic by using the below schema but use existing API key this time.
-```
-{
-  "type": "record",
-  "name": "CreditCards",
-  "namespace": "workshop_5",
-  "fields": [
-    {
-      "name": "credit_card_number",
-      "type": {
-        "type": "long",
-        "arg.properties": {
-          "iteration": {
-            "start": 4738273984732749,
-            "step": 749384739937
-          }
-        }
-      }
-    },
-    {
-      "name": "customer_id",
-      "type": {
-        "type": "int",
-        "arg.properties": {
-          "iteration": {
-            "start": 100
-          }
-        }
-      }
-    },
-    {
-      "name": "maximum_limit",
-      "type": {
-        "type": "int",
-        "arg.properties": {
-          "range": {
-            "min": 10000,
-            "max": 50000
-          }
-        }
-      }
-    }
-  ]
-}
-```
-<div align="center" padding=25px>
-    <img src="images/connectors-6.png" width=75% height=75%>
+| section                            |setting                             | value                        |
+|------------------------------------|------------------------------------|------------------------------|
+| (1) Kafka credentials              | api key                            | [*from step 5* ](#step-5)    |
+| (1) Kafka credentials              | api secret                         | [*from step 5* ](#step-5)    |
+| (2) Authentication                 | database hostname                  | 34.101.213.156               |
+| (2) Authentication                 | database port                      | 5432                         |
+| (2) Authentication                 | database username                  | replica                      |
+| (2) Authentication                 | database password                  | [will be distributed]        |
+| (2) Authentication                 | database name                      | postgres                     |
+| (2) Authentication                 | ssl mode                           | prefer                       |
+| (3) Configuration                  | output record value                | AVRO                         |
+| (3) Configuration                  | output record key                  | AVRO                         |
+| (3) Configuration                  | topic prefix                       | CDC                          |
+| (3) Configuration                  | slot name                          | [yourname]_debezium          |
+| (3) Configuration                  | publication name                   | [yourname]_dbz_publication   |
+| (3) Configuration                  | tables included                    | public.*                     |
+| (3) Configuration                  | value converter decimal format     | NUMERIC                      |
+| (3) Configuration                  | after-state only                   | true                         |
+| (3) Configuration                  | decimal handling mode              | double                       |
+| (3) Configuration                  | time precision mode                | connect                      |
+| (3) Configuration                  | transform name                     | Topic_regexrouter            |
+| (3) Configuration                  | transform type                     | TopicRegexRouter             |
+| (3) Configuration                  | regex                              | ^[^.]+\.[^.]+\.(.*)$         |
+| (3) Configuration                  | replacement                        | [yourname]_$1                |
+| (4) Sizing                         | tasks                              | 1                            |
+| (5) Review and Launch              | connector name                     | PostgreSQL_CDC_Source        |
 </div>
 
 <div align="center" padding=25px>
-    <img src="images/connectors-7.png" width=75% height=75%>
+    <img src="images/psql1.png" width=75% height=75%>
 </div>
 
-> **Note:** If the connectors fails, there are a few different ways to troubleshoot the error:
-> * Click on the *Connector Name*. You will see a play and pause button on this page. Click on the play button.
-> * Click on the *Connector Name*, go to *Settings*, and re-enter your API key and secret. Double check there are no extra spaces at the beginning or end of the key and secret that you may have accidentally copied and pasted.
-> * If neither of these steps work, try creating another Datagen connector.
+<div align="center" padding=25px>
+    <img src="images/psql2.png" width=75% height=75%>
+</div>
 
+<div align="center" padding=25px>
+    <img src="images/psql3.png" width=75% height=75%>
+</div>
 
-11. You can view the sample data flowing into topics in real time. Navigate to  the **Topics** tab and then click on the **customers** and **credit_cards**. You can view the production and consumption throughput metrics here.
+<div align="center" padding=25px>
+    <img src="images/psql31.png" width=75% height=75%>
+</div>
 
-12. Click on **Messages**.
+<div align="center" padding=25px>
+    <img src="images/psql32.png" width=75% height=75%>
+</div>
 
-* You should now be able to see the messages within the UI. You can view the specific messages by clicking the icon.
+<div align="center" padding=25px>
+    <img src="images/psql4.png" width=75% height=75%>
+</div>
+
+<div align="center" padding=25px>
+    <img src="images/psql5.png" width=75% height=75%>
+</div>
+
+4. After launch the connector, you will see new topic created and you can see the transaction message that keep updating from the table
+**Notes**: if you have DBeaver or any universal database manager, you could access the DB to read the value.
+
 ***
 
 ## <a name="step-5"></a>Configure the clients.
