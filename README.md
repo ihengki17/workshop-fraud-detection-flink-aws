@@ -9,52 +9,40 @@
 ## **Agenda**
 1. [Log into Confluent Cloud](#step-1)
 2. [Create an Environment and Cluster](#step-2)
-3. [Create Topics and walk through Confluent Cloud Dashboard](#step-3)
-4. [Create Datagen Connectors for Customers and Credit Cards](#step-4)
-5. [Configure the clients](#step-5)
-6. [Create a Producer for transactions topic](#step-6)
-7. [Perform complex joins using Flink to combine the records into one topic](#step-7)
-8. [Consume feature set topic and predict fraud transactions](#step-8)
-9. [Connect Flink with Bedrock Model](#step-9)
+3. [Create an API Key] (#step-3)
+4. [Create Topics and walk through Confluent Cloud Dashboard](#step-4)
+5. [Create Datagen Connectors for Customers and Credit Cards](#step-5)
+6. [Configure the clients](#step-6)
+7. [Create a Producer for transactions topic](#step-7)
+8. [Perform complex joins using Flink to combine the records into one topic](#step-8)
+9. [Consume feature set topic and predict fraud transactions](#step-9)
 10. [Flink Monitoring](#step-10)
 11. [Clean Up Resources](#step-11)
 12. [Confluent Resources and Further Testing](#step-12)
 ***
 
-## **Prerequisites**
-<br>
-
 1. Create a Confluent Cloud Account.
     - Sign up for a Confluent Cloud account [here](https://www.confluent.io/confluent-cloud/tryfree/).
     - Once you have signed up and logged in, click on the menu icon at the upper right hand corner, click on “Billing & payment”, then enter payment details under “Payment details & contacts”. A screenshot of the billing UI is included below.
 
-2. Install Python 3.8+
-   > If you are using a Linux distribution, chances are you already have Python 3 pre-installed. To see which version of Python 3 you have installed, open a command prompt and run
-   ```
-    python3 --version
-   ```
-
-   If you need to install python3, [this may help](https://docs.python-guide.org/starting/install3/linux/)
-
-3. Install python virtual environment: ```python3 -m pip install venv``` or ```python3 -m pip install virtualenv```
-   > If ```/usr/bin/python3: No module named pip``` error shows up, install python3-pip using
-   > ```
-   > sudo apt-get install -y python3-pip
-   > ```
-
-4. Clone this repo:
-   ```
-   git clone https://github.com/ihengki17/workshop-fraud-detection-flink-aws.git
-   ```
-   
-
-5. Install confluent cloud CLI based on your OS (https://docs.confluent.io/confluent-cli/current/install.html)
-
-> **Note:** You will create resources during this workshop that will incur costs. When you sign up for a Confluent Cloud account, you will get free credits to use in Confluent Cloud. This will cover the cost of resources created during the workshop. More details on the specifics can be found [here](https://www.confluent.io/confluent-cloud/tryfree/).
+> _**Note:** You will create resources during this workshop that will incur costs. When you sign up for a Confluent Cloud account, you will get free credits to use in Confluent Cloud. This will cover the cost of resources created during the workshop. More details on the specifics can be found [here](https://www.confluent.io/confluent-cloud/tryfree/)._
 
 <div align="center" padding=25px>
-    <img src="images/billing.png" width=75% height=75%>
+    <img src="images/survey1.png" width=75% height=75%>
 </div>
+
+<div align="center" padding=25px>
+    <img src="images/survey2.png" width=75% height=75%>
+</div>
+
+<div align="center" padding=25px>
+    <img src="images/survey3.png" width=75% height=75%>
+</div>
+
+**PROMO CODE: POPTOUT0008UZQK**
+
+2. Confluent Cloud cluster with Advanced Stream Governance package
+3. For clients, it recommended to use latest version as Confluent Cloud always maintained the latest patch of Kafka version.
 
 ***
 
@@ -75,7 +63,7 @@ By the end of this workshop, you'll have a clear understanding of how to utilize
 
 ## <a name="step-1"></a>Log into Confluent Cloud
 
-1. Log into [Confluent Cloud](https://confluent.cloud) and enter your email and password.
+1. Log into [Confluent Cloud](https://confluent.cloud) and enter your email and password, If you don't have account you could sign up and use this promo code to access Confluent Cloud **POPTOUT0008UZQK**.
 
 <div align="center" padding=25px>
     <img src="images/login.png" width=50% height=50%>
@@ -87,14 +75,20 @@ By the end of this workshop, you'll have a clear understanding of how to utilize
 
 ## <a name="step-2"></a>Create an Environment and Cluster
 
-An environment contains clusters and its deployed components such as Apache Flink, Connectors, and Schema Registry. You have the ability to create different environments based on your company's requirements. For example, you can use environments to separate Development/Testing, Pre-Production, and Production clusters. 
+An environment contains clusters and its deployed components such as Apache Flink, Connectors, ksqlDB, and Schema Registry. You have the ability to create different environments based on your company's requirements. For example, you can use environments to separate Development/Testing, Pre-Production, and Production clusters. 
 
-1. Click **+ Add Environment**. Specify an **Environment Name** and Click **Create**. 
+1. Click **+ Add cloud environment**. Specify an **Environment Name** and choose the **Essential Package** for stream governance, then Click **Create**. 
 
->**Note:** There is a *default* environment ready in your account upon account creation. You can use this *default* environment for the purpose of this workshop if you do not wish to create an additional environment.
+>Stream Governance have two option **Essential** and **Advanced**, which in Advanced it will give you more rich features over the governance such as Stream Lineage up to 7 days, Data Catalog, Business Metadata, and unlimited Schema to be registered on Confluent Cloud.
+
+>_**Note:** There is a *default* environment ready in your account upon account creation. You can use this *default* environment for the purpose of this workshop if you do not wish to create an additional environment._
 
 <div align="center" padding=25px>
-    <img src="images/environment.png" width=50% height=50%>
+    <img src="images/environment1.png" width=50% height=50%>
+</div>
+
+<div align="center" padding=25px>
+    <img src="images/environment2.png" width=50% height=50%>
 </div>
 
 2. Now that you have an environment, click **Create Cluster**. 
@@ -108,7 +102,7 @@ An environment contains clusters and its deployed components such as Apache Flin
 </div>
 
 4. Click **Begin Configuration**. 
-5. Choose your preferred Cloud Provider (AWS, GCP, or Azure), region, and availability zone. 
+5. Choose **AWS/GCP** as your preferred Cloud Provide on **asia-southeast2/ap-southeast-3 (Jakarta)** region, and **Single-AZ** availability zone. 
 6. Specify a **Cluster Name**. For the purpose of this lab, any name will work here. 
 
 <div align="center" padding=25px>
@@ -120,29 +114,56 @@ An environment contains clusters and its deployed components such as Apache Flin
 
 ***
 
-## <a name="step-3"></a>Creates Topic and Walk Through Cloud Dashboard
+## <a name="step-3"></a>Create an API Key
 
-1. On the navigation menu, you will see **Cluster Overview**. 
-
-> **Note:** This section shows Cluster Metrics, such as Throughput and Storage. This page also shows the number of Topics, Partitions, Connectors, and ksqlDB Applications.
-
-2. Click on **Cluster Settings**. This is where you can find your *Cluster ID, Bootstrap Server, Cloud Details, Cluster Type,* and *Capacity Limits*.
-3. On the same navigation menu, select **Topics** and click **Create Topic**. 
-4. Enter **customers** as the topic name, **3** as the number of partitions, skip the data contract and then click **Create with defaults**.'
+1. Click **API Keys** on the navigation menu. 
+2. Click **Create Key** in order to create your first API Key. If you have an existing API Key select **+ Add Key** to create another API Key.
 
 <div align="center" padding=25px>
-    <img src="images/create-topic.png" width=50% height=50%>
+    <img src="images/create-apikey.png" width=75% height=75%>
 </div>
 
-5. Repeat the previous step and create a second topic name **credit_cards** and **3** as the number of partitions and skip the data contract.
+3. Select **Global Access** and then click **Next**. 
+4. Copy or save your API Key and Secret somewhere. You will need these later on in the lab, you will not be able to view the secret again once you close this dialogue. 
+5. After creating and saving the API key, you will see this API key in the Confluent Cloud UI in the **API Keys** section. If you don’t see the API key populate right away, refresh the browser.
+6. Go back to the environment page and select Schema Registry (SR) and copy the Schema Registry endpoint
+<div align="center" padding=25px>
+    <img src="images/create-srapikey.png" width=75% height=75%>
+</div>
+<div align="center" padding=25px>
+    <img src="images/create-srapikey2.png" width=75% height=75%>
+</div>
 
-> **Note:** Topics have many configurable parameters. A complete list of those configurations for Confluent Cloud can be found [here](https://docs.confluent.io/cloud/current/using/broker-config.html). If you are interested in viewing the default configurations, you can view them in the Topic Summary on the right side. 
-
-7. After topic creation, the **Topics UI** allows you to monitor production and consumption throughput metrics and the configuration parameters for your topics. When you begin sending messages to Confluent Cloud, you will be able to view those messages and message schemas.
+7. Click the API Key to **+Add API Key**
+8. Then copy and save your **SR API Key** and **SR API Secret**.
 
 ***
 
-## <a name="step-4"></a>Create CDC Connectors for Customers and Credit Cards
+## <a name="step-4"></a>Creates Topic and Walk Through Cloud Dashboard
+
+1. On the navigation menu, you will see **Cluster Overview**. 
+1. On the navigation menu, you will see **Cluster Overview**. 
+
+> **Note:** This section shows Cluster Metrics, such as Throughput and Storage. This page also shows the number of Topics, Partitions, Connectors, and ksqlDB Applications.  Below is an example of the metrics dashboard once you have data flowing through Confluent Cloud.
+
+2. Click on **Cluster Settings**. This is where you can find your *Cluster ID, Bootstrap Server, Cloud Details, Cluster Type,* and *Capacity Limits*.
+3. On the same navigation menu, select **Topics** and click **Create Topic**. 
+4. Enter **transactions** as the topic name, **1** as the number of partitions, and then click **Create with defaults**. Skip the data contracts as it will be created on the other step. 
+
+<div align="center" padding=25px>
+    <img src="images/create-topic-1.png" width=50% height=50%>
+</div>
+
+<div align="center" padding=25px>
+    <img src="images/create-topic-2.png" width=50% height=50%>
+</div>
+
+6. After topic creation, the **Topics UI** allows you to monitor production and consumption throughput metrics and the configuration parameters for your topics. When you begin sending messages to Confluent Cloud, you will be able to view those messages and message schemas.
+   
+***
+
+
+## <a name="step-5"></a>Create CDC Connectors for Customers and Credit Cards
 1. Let's create CDC PostgreSQL Source Connector on Confluent Cloud, go back to the Cluster page Overview and click **Connectors** on the left tab
 
 2. Search and Click **Postgres CDC Source V2 (Debezium) connector**
@@ -211,7 +232,7 @@ An environment contains clusters and its deployed components such as Apache Flin
 
 ***
 
-## <a name="step-5"></a>Configure the clients.
+## <a name="step-6"></a>Configure the clients.
 The next step is to run the producer to produce transaction records to the **transactions** topic.
 
 1. Open VS Code or any editor of your choice and open the github repository folder and run the following command
@@ -229,7 +250,7 @@ pip3 install -r requirements.txt
 ```
 5. Create a ```client.properties``` and ```schema.properties``` files in the current folder. Let these be empty now we'll paste the configurations in the next step.
 
-## <a name="step-6"></a>Create a Python Client for transactions topic
+## <a name="step-7"></a>Create a Python Client for transactions topic
 The next step is to produce sample data using a client. You will configure a python client for **transactions** topic.
 
 1. From the Confluent Cloud UI, click on the **Clients** tab on the navigation menu. Click on the **Add new client** button on the top right.
@@ -296,7 +317,7 @@ You can see records being published to transactions topic.
 > * Click on the *Cluster Overiview*, go to *Cluster Settings*,. Double check there are no extra spaces at the beginning or end of the key and secret that you may have accidentally copied and pasted in ```client.properties``` file also verify the ```bootstrap.servers``` value by comparing it with the *Bootstrap Server* value in the Endpoints section in UI. Also verify the ```schema.properties```
 
 
-## <a name="step-7"></a>Perform complex joins using Flink to combine the records into one topic
+## <a name="step-8"></a>Perform complex joins using Flink to combine the records into one topic
 Kafka topics and schemas are always in sync with our Flink cluster. Any topic created in Kafka is visible directly as a table in Flink, and any table created in Flink is visible as a topic in Kafka. Effectively, Flink provides a SQL interface on top of Confluent Cloud.
 
 1. From the Confluent Cloud UI, click on the **Environments** tab on the navigation menu. Choose your environment.
@@ -392,36 +413,7 @@ b. [Hop Windows](https://docs.confluent.io/cloud/current/flink/reference/queries
 c. [Cumulate Windows](https://docs.confluent.io/cloud/current/flink/reference/queries/window-tvf.html#flink-sql-window-tvfs-cumulate)
 <br> 
 
-## <a name="step-8"></a>Consume feature set topic and predict fraud transactions
-The next step is to create a consumer for feature set topic and predict the fraudulent transaction.
-
-1. Update ```client.properties``` file with an additional configuration at the end of the file like following.
-```bash
-auto.offset.reset=earliest
-enable.auto.commit=false
-group.id=FraudDetectorApplication
-```
-
-2. Run the ```fraud_detector.py``` to determine the fraudulent transactions from the feature set and produce the transactions to the topic created above.
-```python
-python3 fraud_detector.py
-```
-
-3. Now you can see few messages in the *fraudulent_transactions* topic. When you see ```Polling for messages...``` continously you can stop the consumer by clicking ```Ctrl+c```
-
-> **Note:** This demonstration simulates a sample condition as a machine learning model to showcase the capabilities of real-time streaming with Confluent Cloud.
-In this setup, a data engineer can extract the required features from various sources into separate topics. These topics enable data scientists to leverage the curated feature sets to develop and train machine learning models outside of the Confluent Cloud environment.
-This illustrates the power of integrating Confluent Cloud for efficient data streaming and feature engineering in the ML workflow.
-
-4. We shall see some fraudulent transactions under ***fraudulent_transactions*** topic by running the following command in flink
-```sql
-SELECT details FROM fraudulent_transactions
-```
-<div align="center" padding=25px>
-    <img src="images/fraud_transactions.png" width=75% height=75%>
-</div>
-
-## <a name="step-9"></a>Connect Flink with Bedrock Model (LLM Inference)
+## <a name="step-9"></a>Consume feature set topic and predict fraud transactions
 
 ### 9.1 Prepare LLM Access (Bedrock Model)
 You have two options:
@@ -466,6 +458,24 @@ You have two options:
 Create a model with inputs/outputs and a system prompt describing the decision logic.
 
 ```sql
+CREATE MODEL fraud_notification
+INPUT(message STRING)
+OUTPUT(notif STRING)
+COMMENT 'Analyze and determine suspicious transaction'
+WITH (
+'provider' = 'bedrock',
+'task' = 'text_generation',
+'bedrock.connection'='bedrock-claude-connection',
+'bedrock.PARAMS.max_tokens' = '2000',
+'bedrock.system_prompt' = 'You’re a fraud analyst on bank syariah with that will check suspicious transaction, you need to analyst and give a proper reasoning why it is being set as fraudulent transactions and create a body message notification to the customers, create the message in proper language as formal notification but not reduce the urgency to act based on what you have analyst on the information that you get.'
+);
+```
+
+### 9.4 Invoke the Model
+Invoke the model against the joined feed and return the decision + reasoning.
+
+
+```sql
 SELECT f.`credit_card_number`, f.customer_email, notif
 FROM fraudulent_transactions f,
 LATERAL TABLE(ML_PREDICT('fraud_notification', CONCAT(
@@ -481,17 +491,6 @@ LATERAL TABLE(ML_PREDICT('fraud_notification', CONCAT(
       'Expected Output – Notification message',
       'Notification: \n\n<Body of Notification message>'
 )));
-
-
-```
-
-### 9.4 Invoke the Model
-Invoke the model against the joined feed and return the decision + reasoning.
-
-
-```sql
-SELECT message FROM fraudulent_transactions, LATERAL TABLE(ML_PREDICT('NotificationEngine', details));
-
 ```
 
 ## <a name="step-10"></a>Flink Monitoring
