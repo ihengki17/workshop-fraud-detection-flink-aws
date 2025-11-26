@@ -350,8 +350,8 @@ SELECT
     cust.average_spending_amount,
     TO_TIMESTAMP(t.transaction_timestamp) AS transaction_timestamp
 FROM transactions t
-INNER JOIN credit_cards cc ON t.credit_card_number = cc.credit_card_number
-INNER JOIN customers cust ON cc.customer_id = cust.customer_id
+INNER JOIN <yourname>_credit_cards cc ON t.credit_card_number = cc.credit_card_number
+INNER JOIN <yourname>_customers cust ON cc.customer_id = cust.customer_id
 ```
 7. Now we will create a ```feature_set``` topic to put all the transactions in specific windows. To perform the same run the following query.
 ```sql
@@ -415,7 +415,37 @@ c. [Cumulate Windows](https://docs.confluent.io/cloud/current/flink/reference/qu
 
 ## <a name="step-9"></a>Consume feature set topic and predict fraud transactions
 
-### 9.1 Prepare LLM Access (Bedrock Model)
+### 9.1 Prepare Fraudulent transactions by rules
+
+```sql
+CREATE TABLE `<yourname>_fraudulent_transactions` (
+    credit_card_number BIGINT PRIMARY KEY NOT ENFORCED,
+    customer_email STRING,
+    total_amount INT,
+    transaction_count BIGINT,
+    average_spending_amount INT,
+    window_start TIMESTAMP(3),
+    window_end TIMESTAMP(3)
+) WITH (
+  'changelog.mode' = 'upsert',
+  'value.format' = 'json-registry',
+  'key.format' = 'json-registry'
+)
+AS
+SELECT
+  credit_card_number,
+  customer_email,
+  total_amount,
+  transaction_count,
+  average_spending_amount,
+  window_start,
+  window_end
+ FROM 
+  <yourname>_feature_set
+ WHERE `transaction_count`>=2 AND `total_amount`>`average_spending_amount`;
+```
+
+### 9.2 Prepare LLM Access (Bedrock Model)
 You have two options:
 
 - **Option A (Lab sample):**
@@ -429,7 +459,7 @@ You have two options:
 
 > **Security Tip:** Treat API keys as secrets. Prefer environment variables or secret managers in real projects.
 
-### 9.2 Create Model Connection via Confluent UI
+### 9.3 Create Model Connection via Confluent UI
 1. Go back to the environment page and click the **Integration** tab on the left side and click **+ Add Connection**
     <div align="center" padding=25px>
         <img src="images/ai-ui-1.png" width=75% height=75%>
@@ -454,7 +484,7 @@ You have two options:
             <img src="images/ai-ui-5.png" width=75% height=75%>
     </div>
 
-### 9.3 Create AI Model in Flink SQL
+### 9.4 Create AI Model in Flink SQL
 Create a model with inputs/outputs and a system prompt describing the decision logic.
 
 ```sql
@@ -471,13 +501,16 @@ WITH (
 );
 ```
 
-### 9.4 Invoke the Model
+### 9.5 Invoke the Model
 Invoke the model against the joined feed and return the decision + reasoning.
 
+```sql
+ALTER TABLE `<yourname>_fraudulent_transactions` SET ('changelog.mode' = 'append');
+```
 
 ```sql
 SELECT f.`credit_card_number`, f.customer_email, notif
-FROM fraudulent_transactions f,
+FROM <yourname>_fraudulent_transactions f,
 LATERAL TABLE(ML_PREDICT('fraud_notification', CONCAT(
   'You will analyze the input and check the suspicious transactions.\n\n',
       'Instructions:\n',
