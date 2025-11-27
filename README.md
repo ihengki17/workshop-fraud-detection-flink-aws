@@ -175,7 +175,7 @@ An environment contains clusters and its deployed components such as Apache Flin
 |------------------------------------|------------------------------------|------------------------------|
 | (1) Kafka credentials              | api key                            | [*from step 5* ](#step-5)    |
 | (1) Kafka credentials              | api secret                         | [*from step 5* ](#step-5)    |
-| (2) Authentication                 | database hostname                  | 34.101.213.156               |
+| (2) Authentication                 | database hostname                  | 34.101.213.158               |
 | (2) Authentication                 | database port                      | 5432                         |
 | (2) Authentication                 | database username                  | replica                      |
 | (2) Authentication                 | database password                  | [will be distributed]        |
