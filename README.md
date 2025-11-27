@@ -246,7 +246,7 @@ source _venv/bin/activate
 ```
 4. Install the dependencies by running the following commmand.
 ```bash
-pip3 install -r requirements.txt
+pip3 install -r requirement.txt
 ```
 5. Create a ```client.properties``` and ```schema.properties``` files in the current folder. Let these be empty now we'll paste the configurations in the next step.
 
@@ -299,16 +299,8 @@ schema.registry.url=https://psrc-em25q.us-east-2.aws.confluent.cloud
 schema.registry.username=xxxxxxxxxx
 schema.registry.password=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
-12. Run the admin client to create required topics.
-```bash
-python3 admin_client.py
-```
-You should be able to view the output something like this..
-```bash
-Topic transactions created
-Topic fraudulent_transactions created
-```
-11. Run the ```producer.py``` file by running the following command.
+
+10. Run the ```producer.py``` file by running the following command.
 ```bash
 python3 producer.py
 ```
