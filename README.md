@@ -242,7 +242,14 @@ cd workshop-fraud-detection-flink-aws
 3. Create a virtual environment for this project and activate it by running the following command
 ```bash
 python3 -m venv _venv
+
+Linux:
 source _venv/bin/activate
+
+or
+
+Windows:
+_venv\Scripts\activate
 ```
 4. Install the dependencies by running the following commmand.
 ```bash
