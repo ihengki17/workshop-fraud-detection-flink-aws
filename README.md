@@ -235,9 +235,9 @@ An environment contains clusters and its deployed components such as Apache Flin
 ## <a name="step-6"></a>Configure the clients.
 The next step is to run the producer to produce transaction records to the **transactions** topic.
 
-1. Open VS Code or any editor of your choice and open the github repository folder and run the following command
+1. Open VS Code or any editor of your choice and open the github repository folder, for example
 ```bash
-cd series-getting-started-with-cc/workshop-predictive-ai
+cd workshop-fraud-detection-flink-aws
 ```
 3. Create a virtual environment for this project and activate it by running the following command
 ```bash
